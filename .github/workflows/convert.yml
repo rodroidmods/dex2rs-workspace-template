@@ -1,0 +1,55 @@
+name: convert
+
+# Everything happens in the reusable workflow this calls. Nothing in this file
+# is logic — it exists so this repository has a workflow_dispatch entry point,
+# and so the app can update the pipeline by moving the `v1` branch upstream
+# instead of asking every user to edit their copy.
+#
+# Do not add steps here. If a conversion needs to change, it changes upstream.
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: "Request identifier. Also the run name the client matches on."
+        required: true
+        type: string
+      abis:
+        description: "Target ABI for the phone that will run the app."
+        default: "arm64-v8a"
+        type: string
+      opt:
+        description: "z for a smaller library, 3 for a faster one."
+        default: "z"
+        type: string
+      api:
+        default: "26"
+        type: string
+      obfuscate:
+        default: false
+        type: boolean
+      dynamic_register:
+        default: true
+        type: boolean
+      compress:
+        default: true
+        type: boolean
+
+# The client finds the run by this string: workflow_dispatch returns 204 with
+# no run id, so there is nothing else to match on.
+run-name: ${{ inputs.job_id }}
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    uses: rodroidmods/dex2rs/.github/workflows/convert.yml@v1
+    with:
+      job_id: ${{ inputs.job_id }}
+      abis: ${{ inputs.abis }}
+      opt: ${{ inputs.opt }}
+      api: ${{ inputs.api }}
+      obfuscate: ${{ inputs.obfuscate }}
+      dynamic_register: ${{ inputs.dynamic_register }}
+      compress: ${{ inputs.compress }}
